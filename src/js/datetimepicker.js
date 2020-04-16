@@ -31,7 +31,8 @@
       dropdownSelector: null,
       minuteStep: 5,
       minView: 'minute',
-      startView: 'day'
+      startView: 'day',
+      showWindow: '='
     })
     .directive('datetimepicker', ['$log', 'dateTimePickerConfig', function datetimepickerDirective($log, defaultConfig) {
 
@@ -60,9 +61,10 @@
       }
 
       var validateConfiguration = function validateConfiguration(configuration) {
-        var validOptions = ['startView', 'minView', 'minuteStep', 'dropdownSelector'];
+        var validOptions = ['startView', 'minView', 'minuteStep', 'dropdownSelector', 'showWindow'];
 
         for (var prop in configuration) {
+          console.log(prop);
           //noinspection JSUnfilteredForInLoop
           if (validOptions.indexOf(prop) < 0) {
             throw ('invalid option: ' + prop);
@@ -119,7 +121,15 @@
         '       </tr>' +
         '   </thead>' +
         '   <tbody>' +
-        '       <tr data-ng-if="data.currentView !== \'day\'" >' +
+        '       <tr data-ng-if="data.currentView === \'hour\' && data.showWindow" >' +
+        '           <td colspan="7" >' +
+        '              <span    class="hour window" ' +
+        '                       data-ng-repeat="dateObject in data.dates"  ' +
+        '                       data-ng-class="{active: dateObject.active, past: dateObject.past, future: dateObject.future, disabled: !dateObject.selectable, force: dateObject.force}" ' +
+        '                       data-ng-click="changeView(data.nextView, dateObject, $event)">{{ dateObject.display }}</span> ' +
+        '           </td>' +
+        '       </tr>' +
+        '       <tr data-ng-if="data.currentView !== \'day\' && !(data.currentView === \'hour\' && data.showWindow)" >' +
         '           <td colspan="7" >' +
         '              <span    class="{{ data.currentView }}" ' +
         '                       data-ng-repeat="dateObject in data.dates"  ' +
@@ -179,7 +189,8 @@
                 }),
                 'leftDate': new DateObject({utcDateValue: moment.utc(startDate).subtract(9, 'year').valueOf()}),
                 'rightDate': new DateObject({utcDateValue: moment.utc(startDate).add(11, 'year').valueOf()}),
-                'dates': []
+                'dates': [],
+                'showWindow': configuration.showWindow
               };
 
               for (var i = 0; i < 12; i += 1) {
@@ -214,7 +225,8 @@
                 }),
                 'leftDate': new DateObject({utcDateValue: moment.utc(startDate).subtract(1, 'year').valueOf()}),
                 'rightDate': new DateObject({utcDateValue: moment.utc(startDate).add(1, 'year').valueOf()}),
-                'dates': []
+                'dates': [],
+                'showWindow': configuration.showWindow
               };
 
               for (var i = 0; i < 12; i += 1) {
@@ -253,7 +265,8 @@
                 'leftDate': new DateObject({utcDateValue: moment.utc(startOfMonth).subtract(1, 'months').valueOf()}),
                 'rightDate': new DateObject({utcDateValue: moment.utc(startOfMonth).add(1, 'months').valueOf()}),
                 'dayNames': [],
-                'weeks': []
+                'weeks': [],
+                'showWindow': configuration.showWindow
               };
 
 
@@ -270,7 +283,8 @@
                     'display': monthMoment.format('D'),
                     'active': monthMoment.format('YYYY-MMM-DD') === activeDate,
                     'past': monthMoment.isBefore(startOfMonth),
-                    'future': monthMoment.isAfter(endOfMonth)
+                    'future': monthMoment.isAfter(endOfMonth),
+                    'showWindow': configuration.showWindow
                   };
                   week.dates.push(new DateObject(dateValue));
                 }
@@ -296,18 +310,33 @@
                 }),
                 'leftDate': new DateObject({utcDateValue: moment.utc(selectedDate).subtract(1, 'days').valueOf()}),
                 'rightDate': new DateObject({utcDateValue: moment.utc(selectedDate).add(1, 'days').valueOf()}),
-                'dates': []
+                'dates': [],
+                'showWindow': configuration.showWindow
               };
 
-              for (var i = 0; i < 24; i += 1) {
-                var hourMoment = moment.utc(selectedDate).add(i, 'hours');
-                var dateValue = {
-                  'utcDateValue': hourMoment.valueOf(),
-                  'display': hourMoment.format('LT'),
-                  'active': hourMoment.format('YYYY-MM-DD H') === activeFormat
-                };
+              if (configuration.showWindow) {
+                for (var i = 7; i < 20; i += 2) {
+                  var hourMoment = moment.utc(selectedDate).add(i, 'hours');
+                  var dateValue = {
+                    'utcDateValue': hourMoment.valueOf(),
+                    'display': hourMoment.format('LT') + " - " + hourMoment.add(2, 'hours').format('LT'),
+                    'active': hourMoment.format('YYYY-MM-DD H') === activeFormat
+                  };
 
-                result.dates.push(new DateObject(dateValue));
+                  result.dates.push(new DateObject(dateValue));
+                }
+              }
+              else {
+                for (var i = 0; i < 24; i += 1) {
+                  var hourMoment = moment.utc(selectedDate).add(i, 'hours');
+                  var dateValue = {
+                    'utcDateValue': hourMoment.valueOf(),
+                    'display': hourMoment.format('LT'),
+                    'active': hourMoment.format('YYYY-MM-DD H') === activeFormat
+                  };
+
+                  result.dates.push(new DateObject(dateValue));
+                }
               }
 
               return result;
@@ -328,7 +357,8 @@
                 }),
                 'leftDate': new DateObject({utcDateValue: moment.utc(selectedDate).subtract(1, 'hours').valueOf()}),
                 'rightDate': new DateObject({utcDateValue: moment.utc(selectedDate).add(1, 'hours').valueOf()}),
-                'dates': []
+                'dates': [],
+                'showWindow': configuration.showWindow
               };
 
               var limit = 60 / configuration.minuteStep;
@@ -394,7 +424,8 @@
                 $dates: result.dates || weekDates,
                 $leftDate: result.leftDate,
                 $upDate: result.previousViewDate,
-                $rightDate: result.rightDate
+                $rightDate: result.rightDate,
+                $showWindow: result.showWindow
               });
 
               scope.data = result;
