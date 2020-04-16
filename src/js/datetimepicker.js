@@ -41,12 +41,13 @@
         var localOffset = tempDate.getTimezoneOffset() * 60000;
         this.utcDateValue = tempDate.getTime();
         this.selectable = true;
+        this.force = false;
 
         this.localDateValue = function () {
           return this.utcDateValue + localOffset;
         };
 
-        var validProperties = ['utcDateValue', 'localDateValue', 'display', 'active', 'selectable', 'past', 'future'];
+        var validProperties = ['utcDateValue', 'localDateValue', 'display', 'active', 'selectable', 'past', 'future', 'force'];
 
         for (var prop in arguments[0]) {
           /* istanbul ignore else */
@@ -122,7 +123,7 @@
         '           <td colspan="7" >' +
         '              <span    class="{{ data.currentView }}" ' +
         '                       data-ng-repeat="dateObject in data.dates"  ' +
-        '                       data-ng-class="{active: dateObject.active, past: dateObject.past, future: dateObject.future, disabled: !dateObject.selectable}" ' +
+        '                       data-ng-class="{active: dateObject.active, past: dateObject.past, future: dateObject.future, disabled: !dateObject.selectable, force: dateObject.force}" ' +
         '                       data-ng-click="changeView(data.nextView, dateObject, $event)">{{ dateObject.display }}</span> ' +
         '           </td>' +
         '       </tr>' +
@@ -130,7 +131,7 @@
         '           <td data-ng-repeat="dateObject in week.dates" ' +
         '               data-ng-click="changeView(data.nextView, dateObject, $event)"' +
         '               class="day" ' +
-        '               data-ng-class="{active: dateObject.active, past: dateObject.past, future: dateObject.future, disabled: !dateObject.selectable}" >{{ dateObject.display }}</td>' +
+        '               data-ng-class="{active: dateObject.active, past: dateObject.past, future: dateObject.future, disabled: !dateObject.selectable, force: dateObject.force}" >{{ dateObject.display }}</td>' +
         '       </tr>' +
         '   </tbody>' +
         '</table></div>',
