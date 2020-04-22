@@ -64,7 +64,6 @@
         var validOptions = ['startView', 'minView', 'minuteStep', 'dropdownSelector', 'showWindow'];
 
         for (var prop in configuration) {
-          console.log(prop);
           //noinspection JSUnfilteredForInLoop
           if (validOptions.indexOf(prop) < 0) {
             throw ('invalid option: ' + prop);
@@ -325,8 +324,7 @@
 
                   result.dates.push(new DateObject(dateValue));
                 }
-              }
-              else {
+              } else {
                 for (var i = 0; i < 24; i += 1) {
                   var hourMoment = moment.utc(selectedDate).add(i, 'hours');
                   var dateValue = {
