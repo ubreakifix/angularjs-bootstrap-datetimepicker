@@ -32,7 +32,7 @@
       minuteStep: 5,
       minView: 'minute',
       startView: 'day',
-      showWindow: '='
+      showWindow: false
     })
     .directive('datetimepicker', ['$log', 'dateTimePickerConfig', function datetimepickerDirective($log, defaultConfig) {
 
